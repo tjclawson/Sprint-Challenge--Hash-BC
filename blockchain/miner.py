@@ -26,6 +26,17 @@ def proof_of_work(last_proof):
     proof = 0
     #  TODO: Your code here
 
+    last_hash = hashlib.sha256(str(last_proof).encode()).hexdigest()
+    while valid_proof(last_hash, proof) is False:
+        proof = random.randint(0, 999999999)
+        if timer() - start > 6:
+            r = requests.get(url=node + "/last_proof")
+            data = r.json()
+            last_proof = data.get('proof')
+            last_hash = hashlib.sha256(str(last_proof).encode()).hexdigest()
+            start = timer()
+            print(f"Got new proof: {last_proof}")
+
     print("Proof found: " + str(proof) + " in " + str(timer() - start))
     return proof
 
@@ -40,7 +51,8 @@ def valid_proof(last_hash, proof):
     """
 
     # TODO: Your code here!
-    pass
+    new_hash = hashlib.sha256(str(proof).encode()).hexdigest()
+    return last_hash[-6:] == new_hash[:6]
 
 
 if __name__ == '__main__':
